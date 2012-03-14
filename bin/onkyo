@@ -3,7 +3,11 @@ use strict;
 use warnings;
 use Device::Onkyo;
 
-my $command = shift || 'MVLUP';
+# ABSTRACT: Perl script to control an Onkyo/Integra AV Receiver
+# PODNAME: onkyo
+
+
+my $command = shift || 'PWR01';
 my $arg = shift;
 my $onkyo = Device::Onkyo->new(device => 'discover');
 if ($onkyo->can($command)) {
@@ -24,3 +28,44 @@ sub resp {
   my ($cmd, $args) = @$msg;
   print $cmd, ' ', $args, "\n";
 }
+
+__END__
+=pod
+
+=head1 NAME
+
+onkyo - Perl script to control an Onkyo/Integra AV Receiver
+
+=head1 VERSION
+
+version 1.120740
+
+=head1 SYNOPSIS
+
+  # send power on
+  onkyo
+
+  # increase volume
+  onkyo volume up
+
+  # decrease volume with "raw" command
+  onkyo MVLDOWN
+
+=head1 DESCRIPTION
+
+This script is an example script to control an Onkyo receiver using the
+L<Device::Onkyo> Perl module.
+
+=head1 AUTHOR
+
+Mark Hindess <soft-cpan@temporalanomaly.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Mark Hindess.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

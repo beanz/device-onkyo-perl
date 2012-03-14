@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 package Device::Onkyo;
+BEGIN {
+  $Device::Onkyo::VERSION = '1.120740';
+}
 
 use Carp qw/croak carp/;
 use Device::SerialPort qw/:PARAM :STAT 0.07/;
@@ -16,29 +19,6 @@ use constant {
 
 # ABSTRACT: To control Onkyo/Intregra AV equipment
 
-=head1 SYNOPSIS
-
-  my $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
-  $onkyo->write('PWR01'); # switch on
-  while (1) {
-    my $message = $onkyo->read();
-    print $message, "\n";
-  }
-
-  $onkyo = Device::Onkyo->new(device => 'hostname:port');
-  $onkyo->write('PWR01'); # switch on
-
-  $onkyo = Device::Onkyo->new(device => 'discover');
-  $onkyo->write('PWR01'); # switch on
-
-=head1 DESCRIPTION
-
-Module for controlling Onkyo/Intregra AV equipment.
-
-B<IMPORTANT:> This is an early release and the API is still subject to
-change. The serial port usage is entirely untested.
-
-=cut
 
 sub new {
   my ($pkg, %p) = @_;
@@ -271,3 +251,50 @@ sub power {
 }
 
 1;
+
+__END__
+=pod
+
+=head1 NAME
+
+Device::Onkyo - To control Onkyo/Intregra AV equipment
+
+=head1 VERSION
+
+version 1.120740
+
+=head1 SYNOPSIS
+
+  my $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
+  $onkyo->write('PWR01'); # switch on
+  while (1) {
+    my $message = $onkyo->read();
+    print $message, "\n";
+  }
+
+  $onkyo = Device::Onkyo->new(device => 'hostname:port');
+  $onkyo->write('PWR01'); # switch on
+
+  $onkyo = Device::Onkyo->new(device => 'discover');
+  $onkyo->write('PWR01'); # switch on
+
+=head1 DESCRIPTION
+
+Module for controlling Onkyo/Intregra AV equipment.
+
+B<IMPORTANT:> This is an early release and the API is still subject to
+change. The serial port usage is entirely untested.
+
+=head1 AUTHOR
+
+Mark Hindess <soft-cpan@temporalanomaly.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Mark Hindess.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

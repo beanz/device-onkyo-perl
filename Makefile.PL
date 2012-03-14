@@ -1,0 +1,66 @@
+
+use strict;
+use warnings;
+
+
+
+use ExtUtils::MakeMaker 6.31;
+
+
+
+my %WriteMakefileArgs = (
+  'ABSTRACT' => 'To control Onkyo/Intregra AV equipment',
+  'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
+  'BUILD_REQUIRES' => {
+    'English' => '0',
+    'Test::More' => '0',
+    'Test::Requires' => '0',
+    'Test::SharedFork' => '0'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
+  },
+  'DISTNAME' => 'Device-Onkyo',
+  'EXE_FILES' => [
+    'bin/onkyo'
+  ],
+  'LICENSE' => 'perl',
+  'NAME' => 'Device::Onkyo',
+  'PREREQ_PM' => {
+    'Carp' => '0',
+    'Device::SerialPort' => '0',
+    'Fcntl' => '0',
+    'IO::Select' => '0',
+    'IO::Socket::INET' => '0',
+    'Socket' => '0',
+    'Symbol' => '0',
+    'Time::HiRes' => '0',
+    'constant' => '0'
+  },
+  'VERSION' => '1.120740',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

@@ -1,0 +1,35 @@
+NAME
+    Device::Onkyo - To control Onkyo/Intregra AV equipment
+
+VERSION
+    version 1.120740
+
+SYNOPSIS
+      my $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
+      $onkyo->write('PWR01'); # switch on
+      while (1) {
+        my $message = $onkyo->read();
+        print $message, "\n";
+      }
+
+      $onkyo = Device::Onkyo->new(device => 'hostname:port');
+      $onkyo->write('PWR01'); # switch on
+
+      $onkyo = Device::Onkyo->new(device => 'discover');
+      $onkyo->write('PWR01'); # switch on
+
+DESCRIPTION
+    Module for controlling Onkyo/Intregra AV equipment.
+
+    IMPORTANT: This is an early release and the API is still subject to
+    change. The serial port usage is entirely untested.
+
+AUTHOR
+    Mark Hindess <soft-cpan@temporalanomaly.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2012 by Mark Hindess.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
