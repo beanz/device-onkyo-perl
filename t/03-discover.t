@@ -39,7 +39,6 @@ if ($pid == 0) {
   ok $client, 'client accepted';
   $sel = IO::Select->new($client);
   $sel->can_read(10) or die;
-  my $buf;
   my $bytes = sysread $client, $buf, 2048;
   is $bytes, 24, '... power on length';
   is_deeply [ unpack 'a4 N N N a*', $buf ],
