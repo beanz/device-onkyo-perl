@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Device::Onkyo;
+
+my $command = shift || 'MVLUP';
+my $arg = shift;
+my $onkyo = Device::Onkyo->new(device => 'discover');
+if ($onkyo->can($command)) {
+  $onkyo->$command($arg);
+} else {
+  $onkyo->write($command);
+}
+
+my ($cmd, $args) = @{$onkyo->read};
+if ($cmd eq 'NLS') {
+  ($cmd, $args) = @{$onkyo->read};
+}
+print "$cmd $args\n";
+
+sub resp {
+  my $onkyo = shift;
+  my $msg = $onkyo->read;
+  my ($cmd, $args) = @$msg;
+  print $cmd, ' ', $args, "\n";
+}

@@ -1,0 +1,6 @@
+/Device-Onkyo-*
+/.build
+/cover_db
+*~
+/.tdldb.bak
+/temp
