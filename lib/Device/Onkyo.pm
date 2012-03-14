@@ -18,7 +18,10 @@ use constant {
 
 =head1 SYNOPSIS
 
-  my $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
+  my $onkyo = Device::Onkyo->new(device => 'discover');
+  $onkyo->power('on'); # switch on
+
+  $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
   $onkyo->write('PWR01'); # switch on
   while (1) {
     my $message = $onkyo->read();
@@ -26,9 +29,6 @@ use constant {
   }
 
   $onkyo = Device::Onkyo->new(device => 'hostname:port');
-  $onkyo->write('PWR01'); # switch on
-
-  $onkyo = Device::Onkyo->new(device => 'discover');
   $onkyo->write('PWR01'); # switch on
 
 =head1 DESCRIPTION
