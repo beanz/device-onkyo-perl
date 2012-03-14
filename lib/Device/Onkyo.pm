@@ -195,7 +195,7 @@ sub discover {
   my $b = $buf;
   my $msg = $self->read_one(\$b);
   my ($cmd, $arg) = @$msg;
-  ($port) = ($arg =~ m!/(\d{5})/../[0-9a-f]{12}$!i);
+  ($port) = ($arg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port (@$msg)\n" if DEBUG;
   $self->{port} = $port;
   return $ip.':'.$port;
