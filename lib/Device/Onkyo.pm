@@ -202,8 +202,10 @@ sub discover {
 }
 
 sub write {
-  my $self = shift;
-  push @{$self->{_q}}, \@_;
+  my ($self, $cmd, $cb) = @_;
+  print STDERR "queuing: $cmd\n" if DEBUG;
+  my $str = $self->pack($cmd);
+  push @{$self->{_q}}, [$str, $cmd, $cb];
   $self->_write_now unless ($self->{_waiting});
   1;
 }
@@ -216,14 +218,13 @@ sub _write_now {
     $wait_rec->[1]->() if ($wait_rec->[1]);
   }
   return unless (defined $rec);
-  $self->_real_write($rec);
+  $self->_real_write(@$rec);
   $self->{waiting} = [ $self->_time_now, $rec ];
 }
 
 sub _real_write {
-  my ($self, $rec) = @_;
-  my $str = $self->pack(@$rec);
-  print STDERR "sending: ", (unpack "H*", $str), "\n" if DEBUG;
+  my ($self, $str, $desc, $cb) = @_;
+  print STDERR "sending: $desc\n  ", (unpack "H*", $str), "\n" if DEBUG;
   syswrite $self->filehandle, $str, length $str;
 }
 
