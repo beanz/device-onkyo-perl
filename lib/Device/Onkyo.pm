@@ -130,7 +130,7 @@ sub read {
 }
 
 sub read_one {
-  my ($self, $rbuf) = @_;
+  my ($self, $rbuf, $no_write) = @_;
   return unless ($$rbuf);
 
   print STDERR "rbuf=", (unpack "H*", $$rbuf), "\n" if DEBUG;
@@ -154,14 +154,14 @@ sub read_one {
     $body =~ s/[\032\r\n]+$//;
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now;
+    $self->_write_now unless ($no_write);
     return [ $command, $body ];
   } else {
     return unless ($$rbuf =~ s/^(..)(...)(.*?)[\032\r\n]+//);
     my ($sd, $command, $body) = ($1, $2, $3);
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now;
+    $self->_write_now unless ($no_write);
     return [ $command, $body ];
   }
 }
@@ -193,7 +193,7 @@ sub discover {
   my ($port, $addr) = sockaddr_in($sender);
   my $ip = inet_ntoa($addr);
   my $b = $buf;
-  my $msg = $self->read_one(\$b);
+  my $msg = $self->read_one(\$b, 1); # don't uncork writes
   my ($cmd, $arg) = @$msg;
   ($port) = ($arg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port (@$msg)\n" if DEBUG;
