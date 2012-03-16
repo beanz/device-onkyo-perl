@@ -11,14 +11,14 @@ use Pod::Usage;
 
 =head1 SYNOPSIS
 
-  # send power on
-  onkyo
-
-  # increase volume
+  # increase volume (using discovery)
   onkyo volume up
 
-  # decrease volume with "raw" command
+  # decrease volume with "raw" command (using discovery)
   onkyo MVLDOWN
+
+  # send multiple commands (using named device)
+  (echo power on ; echo volume- ) | onkyo --device amp.example.com
 
 =head1 DESCRIPTION
 
