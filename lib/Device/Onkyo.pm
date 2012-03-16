@@ -14,7 +14,7 @@ use constant {
   DEBUG => $ENV{DEVICE_ONKYO_DEBUG},
 };
 
-# ABSTRACT: To control Onkyo/Intregra AV equipment
+# ABSTRACT: Perl module to control Onkyo/Intregra AV equipment
 
 =head1 SYNOPSIS
 
@@ -244,31 +244,131 @@ sub pack {
   }
 }
 
-sub volume {
-  my ($self, $percent, $cb) = @_;
-  if ($percent =~ /^(?:up|\+)$/i) {
-    $self->write('MVLUP' => $cb);
-  } elsif ($percent =~ /^(?:down|-)$/i) {
-    $self->write('MVLDOWN' => $cb);
-  } elsif ($percent =~ /^(100|[0-9][0-9]?)%?$/) {
-    my $cmd = sprintf 'MVL%02x', $1;
-    $self->write($cmd => $cb);
-  } elsif ($percent =~ /^(?:QSTN|\?)$/i) {
-    $self->write('MVLQSTN' => $cb);
-  } else {
-    croak "volume: argument should be up/down/percentage/? not '$percent'";
-  }
+sub canon_command {
+  my $str = shift;
+  $str =~ s/(?:question|query|qstn)/?/g;
+  $str =~ s/^master\ //g;
+  $str =~ s/volume/vol/g;
+  $str =~ s/centre/center/g;
+  $str =~ s/up/+/g;
+  $str =~ s/down/-/g;
+  $str =~ s/\s+//g;
+  $str;
 }
 
-sub power {
+our %command_map =
+  (
+   'power on' => 'PWR01',
+   'power off' => 'PWR00',
+   'power standby' => 'PWR00',
+   'power?' => 'PWRQSTN',
+   'mute' => 'AMT00',
+   'unmute' => 'AMT01',
+   'toggle mute' => 'AMTTG',
+   'mute?' => 'AMTQSTN',
+   'speaker a on' => 'SPA01',
+   'speaker a off' => 'SPA00',
+   'toggle speaker a' => 'SPAUP',
+   'speaker a?' => 'SPAQSTN',
+   'speaker b on' => 'SPB01',
+   'speaker b off' => 'SPB00',
+   'toggle speaker b' => 'SPBUP',
+   'speaker b?' => 'SPBQSTN',
+   'volume+' => 'MVLUP',
+   'volume-' => 'MVLDOWN',
+
+   'front bass+' => 'TFRBUP',
+   'front bass-' => 'TFRBDOWN',
+   'front treble+' => 'TFRTUP',
+   'front treble-' => 'TFRTDOWN',
+   'front tone?' => 'TFRQSTN',
+
+   'front wide bass+' => 'TFWBUP',
+   'front wide bass-' => 'TFWBDOWN',
+   'front wide treble+' => 'TFWTUP',
+   'front wide treble-' => 'TFWTDOWN',
+   'front wide tone?' => 'TFWQSTN',
+
+   'front high bass+' => 'TFHBUP',
+   'front high bass-' => 'TFHBDOWN',
+   'front high treble+' => 'TFHTUP',
+   'front high treble-' => 'TFHTDOWN',
+   'front high tone?' => 'TFHQSTN',
+
+   'center bass+' => 'TCTBUP',
+   'center bass-' => 'TCTBDOWN',
+   'center treble+' => 'TCTTUP',
+   'center treble-' => 'TCTTDOWN',
+   'center tone?' => 'TCTQSTN',
+
+   'surround bass+' => 'TSRBUP',
+   'surround bass-' => 'TSRBDOWN',
+   'surround treble+' => 'TSRTUP',
+   'surround treble-' => 'TSRTDOWN',
+   'surround tone?' => 'TSRQSTN',
+
+   'surround back bass+' => 'TSBBUP',
+   'surround back bass-' => 'TSBBDOWN',
+   'surround back treble+' => 'TSBTUP',
+   'surround back treble-' => 'TSBTDOWN',
+   'surround back tone?' => 'TSBQSTN',
+
+   'subwoofer bass+' => 'TSWBUP',
+   'subwoofer bass-' => 'TSWBDOWN',
+   'subwoofer treble+' => 'TSWTUP',
+   'subwoofer treble-' => 'TSWTDOWN',
+   'subwoofer tone?' => 'TSWQSTN',
+
+   'sleep off' => 'SLPOFF',
+   'sleep?' => 'SLPQSTN',
+
+   'display0' => 'DIF00',
+   'display1' => 'DIF01',
+   'display2' => 'DIF02',
+   'display3' => 'DIF03',
+   'display toggle' => 'DIFTG',
+   'display?' => 'DIFQSTN',
+
+   'dimmer bright' => 'DIM00',
+   'dimmer dim' => 'DIM01',
+   'dimmer dark' => 'DIM02',
+   'dimmer off' => 'DIM03',
+   'dimmer ledoff' => 'DIM08',
+   'dimmer toggle' => 'DIMTG',
+   'dimmer?' => 'DIMQSTN',
+
+   'menu key' => 'OSDMENU',
+   'up key' => 'OSDUP',
+   'down key' => 'OSDDOWN',
+   'right key' => 'OSDRIGHT',
+   'left key' => 'OSDLEFT',
+   'enter key' => 'OSDENTER',
+   'exit key' => 'OSDEXIT',
+   'audio key' => 'OSDAUDIO',
+   'video key' => 'OSDVIDEO',
+   'home key' => 'OSDHOME',
+
+#   'memory store' => 'MEMSTR',
+#   'memory recall' => 'MEMRCL',
+#   'memory lock' => 'MEMLOCK',
+#   'memory unlock' => 'MEMUNLK',
+
+  );
+foreach my $k (keys %command_map) {
+  $command_map{canon_command($k)} = delete $command_map{$k};
+}
+
+sub command {
   my ($self, $cmd, $cb) = @_;
-  my $str = { on => '01', off => '00',
-              '?' => 'QSTN', qstn => 'QSTN' }->{lc $cmd};
+  my $str = $command_map{canon_command($cmd)};
   if (defined $str) {
-    $self->write('PWR'.$str => $cb);
-  } else {
-    croak "power: argument should be on/off/? not '$cmd'";
+    $cmd = $str;
+  } elsif ($cmd =~ /^vol(100|[0-9][0-9]?)%?$/) {
+    $cmd = sprintf 'MVL%02x', $1;
+  } elsif ($cmd =~ /^sleep(90|[0-8][0-9]|[1-9])m\w+?$/) {
+    $cmd = sprintf 'SLP%02x', $1;
   }
+  $self->write($cmd, $cb);
 }
 
 1;
