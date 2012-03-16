@@ -133,7 +133,7 @@ sub read_one {
   my ($self, $rbuf, $no_write) = @_;
   return unless ($$rbuf);
 
-  print STDERR "rbuf=", (unpack "H*", $$rbuf), "\n" if DEBUG;
+  print STDERR "rbuf=", _hexdump($$rbuf), "\n" if DEBUG;
 
   if ($self->{type} eq 'eISCP') {
     my $length = length $$rbuf;
@@ -150,19 +150,18 @@ sub read_one {
                  $header_size) unless ($header_size == 0x10);
     my $body = substr $$rbuf, 0, $data_size, '';
     my $sd = substr $body, 0, 2, '';
-    my $command = substr $body, 0, 3, '';
     $body =~ s/[\032\r\n]+$//;
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
     $self->_write_now unless ($no_write);
-    return [ $command, $body ];
+    return $body;
   } else {
-    return unless ($$rbuf =~ s/^(..)(...)(.*?)[\032\r\n]+//);
-    my ($sd, $command, $body) = ($1, $2, $3);
+    return unless ($$rbuf =~ s/^(..)(....*?)[\032\r\n]+//);
+    my ($sd, $body) = ($1, $2);
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
     $self->_write_now unless ($no_write);
-    return [ $command, $body ];
+    return $body;
   }
 }
 
@@ -194,8 +193,7 @@ sub discover {
   my $ip = inet_ntoa($addr);
   my $b = $buf;
   my $msg = $self->read_one(\$b, 1); # don't uncork writes
-  my ($cmd, $arg) = @$msg;
-  ($port) = ($arg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
+  ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port (@$msg)\n" if DEBUG;
   $self->{port} = $port;
   return $ip.':'.$port;
@@ -224,7 +222,7 @@ sub _write_now {
 
 sub _real_write {
   my ($self, $str, $desc, $cb) = @_;
-  print STDERR "sending: $desc\n  ", (unpack "H*", $str), "\n" if DEBUG;
+  print STDERR "sending: $desc\n  ", _hexdump($str), "\n" if DEBUG;
   syswrite $self->filehandle, $str, length $str;
 }
 
@@ -246,6 +244,7 @@ sub pack {
 
 sub canon_command {
   my $str = shift;
+  $str =~ tr/A-Z/a-z/;
   $str =~ s/(?:question|query|qstn)/?/g;
   $str =~ s/^master\ //g;
   $str =~ s/volume/vol/g;
@@ -276,6 +275,7 @@ our %command_map =
    'speaker b?' => 'SPBQSTN',
    'volume+' => 'MVLUP',
    'volume-' => 'MVLDOWN',
+   'volume?' => 'MVLQSTN',
 
    'front bass+' => 'TFRBUP',
    'front bass-' => 'TFRBDOWN',
@@ -360,15 +360,25 @@ foreach my $k (keys %command_map) {
 
 sub command {
   my ($self, $cmd, $cb) = @_;
-  my $str = $command_map{canon_command($cmd)};
+  my $canon = canon_command($cmd);
+  my $str = $command_map{$canon};
   if (defined $str) {
     $cmd = $str;
-  } elsif ($cmd =~ /^vol(100|[0-9][0-9]?)%?$/) {
+  } elsif ($canon =~ /^vol(100|[0-9][0-9]?)%?$/) {
     $cmd = sprintf 'MVL%02x', $1;
-  } elsif ($cmd =~ /^sleep(90|[0-8][0-9]|[1-9])m\w+?$/) {
+  } elsif ($canon =~ /^sleep(90|[0-8][0-9]|[1-9])m\w+?$/) {
     $cmd = sprintf 'SLP%02x', $1;
+  } elsif ($cmd !~ /^[A-Z][A-Z][A-Z]/) {
+    croak ref($self)."->command: '$cmd' does not match /^[A-Z][A-Z][A-Z]/";
   }
   $self->write($cmd, $cb);
+}
+
+sub _hexdump {
+  my $s = shift;
+  my $r = unpack 'H*', $s;
+  $s =~ s/[^ -~]/./g;
+  $r.' '.$s;
 }
 
 1;
