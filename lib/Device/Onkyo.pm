@@ -212,12 +212,13 @@ sub _write_now {
   my $self = shift;
   my $rec = shift @{$self->{_q}};
   my $wait_rec = delete $self->{_waiting};
-  if ($wait_rec) {
-    $wait_rec->[1]->() if ($wait_rec->[1]);
+  if ($wait_rec && $wait_rec->[1]) {
+    my ($str, $cmd, $cb) = @{$wait_rec->[1]};
+    $cb->() if ($cb);
   }
   return unless (defined $rec);
   $self->_real_write(@$rec);
-  $self->{waiting} = [ $self->_time_now, $rec ];
+  $self->{_waiting} = [ $self->_time_now, $rec ];
 }
 
 sub _real_write {
@@ -232,8 +233,6 @@ sub pack {
   if ($self->{type} eq 'eISCP') {
     # 4953 4350 0000 0010 0000 000a 0100 0000 ISCP............
     # 2131 4d56 4c32 381a 0d0a                !1MVL28...
-    # 4953 4350 0000 0010 0000 000a 0100 0000 ISCP............
-    # 2131 4d56 4c32 381a 0d0a
     $d .= "\r";
     pack("a* N N N a*",
          'ISCP', 0x10, (length $d), 0x01000000, $d);
