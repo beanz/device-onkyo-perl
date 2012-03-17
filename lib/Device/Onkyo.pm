@@ -194,7 +194,7 @@ sub discover {
   my $b = $buf;
   my $msg = $self->read_one(\$b, 1); # don't uncork writes
   ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
-  print STDERR "discovered: $ip:$port (@$msg)\n" if DEBUG;
+  print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
   $self->{port} = $port;
   return $ip.':'.$port;
 }
