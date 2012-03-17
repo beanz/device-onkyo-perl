@@ -27,6 +27,8 @@ L<Device::Onkyo> Perl module.
 
 =cut
 
+$|=1; # don't buffer output
+
 my $man;
 my $help;
 my $device = 'discover';
