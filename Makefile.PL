@@ -9,7 +9,7 @@ use ExtUtils::MakeMaker 6.31;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'To control Onkyo/Intregra AV equipment',
+  'ABSTRACT' => 'Perl module to control Onkyo/Intregra AV equipment',
   'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
   'BUILD_REQUIRES' => {
     'English' => '0',
@@ -30,14 +30,16 @@ my %WriteMakefileArgs = (
     'Carp' => '0',
     'Device::SerialPort' => '0',
     'Fcntl' => '0',
+    'Getopt::Long' => '0',
     'IO::Select' => '0',
     'IO::Socket::INET' => '0',
+    'Pod::Usage' => '0',
     'Socket' => '0',
     'Symbol' => '0',
     'Time::HiRes' => '0',
     'constant' => '0'
   },
-  'VERSION' => '1.120740',
+  'VERSION' => '1.120780',
   'test' => {
     'TESTS' => 't/*.t'
   }

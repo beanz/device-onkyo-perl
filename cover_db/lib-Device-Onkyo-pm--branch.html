@@ -20,7 +20,7 @@ http://www.pjcj.net
 <h1>Branch Coverage</h1>
 <table>
 <tr><td class="h" align="right">File:</td><td align="left">lib/Device/Onkyo.pm</td></tr>
-<tr><td class="h" align="right">Coverage:</td><td align="left" class="c0">62.2%</td></tr>
+<tr><td class="h" align="right">Coverage:</td><td align="left" class="c0">59.2%</td></tr>
 </table>
 <div><br/></div>
 <table>
@@ -47,21 +47,22 @@ http://www.pjcj.net
 <tr><td class="h"><a id="L145">145</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $length &gt;= $header_size + $data_size</td></tr>
 <tr><td class="h"><a id="L147">147</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $version == 1</td></tr>
 <tr><td class="h"><a id="L149">149</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $header_size == 16</td></tr>
-<tr><td class="h"><a id="L155">155</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sd eq &#39;!1&#39;</td></tr>
-<tr><td class="h"><a id="L160">160</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $$rbuf =~ s/^(..)(...)(.*?)[\032\r\n]+//</td></tr>
-<tr><td class="h"><a id="L162">162</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sd eq &#39;!1&#39;</td></tr>
-<tr><td class="h"><a id="L189">189</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sel-&gt;can_read(10)</td></tr>
-<tr><td class="h"><a id="L191">191</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless defined $sender</td></tr>
+<tr><td class="h"><a id="L154">154</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sd eq &#39;!1&#39;</td></tr>
+<tr><td class="h"><a id="L156">156</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $no_write</td></tr>
+<tr><td class="h"><a id="L159">159</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $$rbuf =~ s/^(..)(....*?)[\032\r\n]+//</td></tr>
+<tr><td class="h"><a id="L161">161</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sd eq &#39;!1&#39;</td></tr>
+<tr><td class="h"><a id="L163">163</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">unless $no_write</td></tr>
+<tr><td class="h"><a id="L188">188</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless $sel-&gt;can_read(10)</td></tr>
+<tr><td class="h"><a id="L190">190</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless defined $sender</td></tr>
 <tr><td class="h"><a id="L207">207</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">unless $$self{&#39;_waiting&#39;}</td></tr>
 <tr><td class="h"><a id="L215">215</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">if ($wait_rec)</td></tr>
 <tr><td class="h"><a id="L216">216</a></td><td class="c0">0</td><td class="c0">T</td><td class="c0">F</td><td class="s">if $$wait_rec[1]</td></tr>
 <tr><td class="h"><a id="L218">218</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $rec</td></tr>
-<tr><td class="h"><a id="L233">233</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if ($$self{&#39;type&#39;} eq &#39;eISCP&#39;) { }</td></tr>
-<tr><td class="h"><a id="L248">248</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($percent =~ /^(?:up|\+)$/i) { }</td></tr>
-<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($percent =~ /^(?:down|-)$/i) { }</td></tr>
-<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($percent =~ /^(100|[0-9][0-9]?)%?$/) { }</td></tr>
-<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($percent =~ /^(?:QSTN|\?)$/i) { }</td></tr>
-<tr><td class="h"><a id="L266">266</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $str) { }</td></tr>
+<tr><td class="h"><a id="L232">232</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if ($$self{&#39;type&#39;} eq &#39;eISCP&#39;) { }</td></tr>
+<tr><td class="h"><a id="L365">365</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $str) { }</td></tr>
+<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($canon =~ /^vol(100|[0-9][0-9]?)%?$/) { }</td></tr>
+<tr><td class="h"></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">elsif ($canon =~ /^sleep(90|[0-8][0-9]|[1-9])m\w+?$/) { }</td></tr>
+<tr><td class="h"></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">elsif (not $cmd =~ /^[A-Z][A-Z][A-Z]/) { }</td></tr>
 </table>
 </body>
 </html>

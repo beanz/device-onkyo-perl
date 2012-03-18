@@ -6,7 +6,7 @@ use strict;
 use constant {
   DEBUG => $ENV{DEVICE_ONKYO_TEST_DEBUG}
 };
-use Test::More tests => 11;
+use Test::More tests => 10;
 
 {
   package My::Onkyo;
@@ -30,33 +30,29 @@ my $onkyo = My::Onkyo->new(filehandle => $fh);
 ok $onkyo, 'object created';
 
 my $cb = sub {};
-$onkyo->volume('up' => $cb);
+$onkyo->command('volume up' => $cb);
 is_deeply $onkyo->calls, [['MVLUP', $cb]], '... volume up';
 
-$onkyo->volume('down' => $cb);
+$onkyo->command('volume -' => $cb);
 is_deeply $onkyo->calls, [['MVLDOWN', $cb]], '... volume down';
 
-$onkyo->volume('?' => $cb);
+$onkyo->command('vol?' => $cb);
 is_deeply $onkyo->calls, [['MVLQSTN', $cb]], '... volume query';
 
-$onkyo->volume(100 => $cb);
+$onkyo->command('volume 100%' => $cb);
 is_deeply $onkyo->calls, [['MVL64', $cb]], '... volume 100%';
 
-$onkyo->volume('10%' => $cb);
+$onkyo->command('vol10%' => $cb);
 is_deeply $onkyo->calls, [['MVL0a', $cb]], '... volume 10%';
 
-eval { $onkyo->volume('110%') };
-like $@, qr!^volume: argument should be up/down/percentage/\? not '110%'!,
-  '... volume error';
-
-$onkyo->power(on => $cb);
+$onkyo->command('power on' => $cb);
 is_deeply $onkyo->calls, [['PWR01', $cb]], '... power on';
 
-$onkyo->power(off => $cb);
+$onkyo->command('poweroff' => $cb);
 is_deeply $onkyo->calls, [['PWR00', $cb]], '... power off';
 
-$onkyo->power(qstn => $cb);
+$onkyo->command('power query' => $cb);
 is_deeply $onkyo->calls, [['PWRQSTN', $cb]], '... power query';
 
-eval { $onkyo->power('up') };
-like $@, qr!^power: argument should be on/off/\? not 'up'!, '... power error';
+eval { $onkyo->command('power up') };
+like $@, qr!^My::Onkyo->command: 'power up' does not match!, '... power error';

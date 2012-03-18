@@ -48,7 +48,7 @@ if ($pid == 0) {
   my $onkyo = Device::Onkyo->new(device => 'discover', port => $port);
   ok $onkyo, 'object';
   is $onkyo->port, $tcp_port, '... discovered';
-  $onkyo->power('on');
+  $onkyo->command('power on');
   waitpid $pid, 0;
   done_testing;
 } else {

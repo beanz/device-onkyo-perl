@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Device::Onkyo;
 BEGIN {
-  $Device::Onkyo::VERSION = '1.120740';
+  $Device::Onkyo::VERSION = '1.120780';
 }
 
 use Carp qw/croak carp/;
@@ -17,7 +17,7 @@ use constant {
   DEBUG => $ENV{DEVICE_ONKYO_DEBUG},
 };
 
-# ABSTRACT: To control Onkyo/Intregra AV equipment
+# ABSTRACT: Perl module to control Onkyo/Intregra AV equipment
 
 
 sub new {
@@ -28,20 +28,29 @@ sub new {
                     type => 'eISCP',
                     port => 60128,
                     baud => 9600,
-                    discard_timeout => 1,
+                    device => 'discover',
                     %p
                    }, $pkg;
-  unless (exists $p{filehandle}) {
-    croak $pkg.q{->new: 'device' parameter is required}
-      unless (exists $p{device});
+  if (exists $p{filehandle}) {
+    delete $self->{device};
+  } else {
     $self->_open();
   }
   $self;
 }
 
+
+sub device { shift->{device} }
+
+
+sub type { shift->{type} }
+
+
 sub baud { shift->{baud} }
 
+
 sub port { shift->{port} }
+
 
 sub filehandle { shift->{filehandle} }
 
@@ -89,11 +98,11 @@ sub _open_serial_port {
   return $self->{filehandle} = $fh;
 }
 
+
 sub read {
   my ($self, $timeout) = @_;
   my $res = $self->read_one(\$self->{_buf});
   return $res if (defined $res);
-  $self->_discard_buffer_check(\$self->{_buf}) if ($self->{_buf} ne '');
   my $fh = $self->filehandle;
   my $sel = IO::Select->new($fh);
   do {
@@ -109,11 +118,12 @@ sub read {
   } while (1);
 }
 
+
 sub read_one {
-  my ($self, $rbuf) = @_;
+  my ($self, $rbuf, $no_write) = @_;
   return unless ($$rbuf);
 
-  print STDERR "rbuf=", (unpack "H*", $$rbuf), "\n" if DEBUG;
+  print STDERR "rbuf=", _hexdump($$rbuf), "\n" if DEBUG;
 
   if ($self->{type} eq 'eISCP') {
     my $length = length $$rbuf;
@@ -130,25 +140,25 @@ sub read_one {
                  $header_size) unless ($header_size == 0x10);
     my $body = substr $$rbuf, 0, $data_size, '';
     my $sd = substr $body, 0, 2, '';
-    my $command = substr $body, 0, 3, '';
     $body =~ s/[\032\r\n]+$//;
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now;
-    return [ $command, $body ];
+    $self->_write_now unless ($no_write);
+    return $body;
   } else {
-    return unless ($$rbuf =~ s/^(..)(...)(.*?)[\032\r\n]+//);
-    my ($sd, $command, $body) = ($1, $2, $3);
+    return unless ($$rbuf =~ s/^(..)(....*?)[\032\r\n]+//);
+    my ($sd, $body) = ($1, $2);
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now;
-    return [ $command, $body ];
+    $self->_write_now unless ($no_write);
+    return $body;
   }
 }
 
 sub _time_now {
   Time::HiRes::time
 }
+
 
 # 4953 4350 0000 0010 0000 000b 0100 0000  ISCP............
 # 2178 4543 4e51 5354 4e0d 0a              !xECNQSTN\r\n
@@ -173,17 +183,19 @@ sub discover {
   my ($port, $addr) = sockaddr_in($sender);
   my $ip = inet_ntoa($addr);
   my $b = $buf;
-  my $msg = $self->read_one(\$b);
-  my ($cmd, $arg) = @$msg;
-  ($port) = ($arg =~ m!/(\d{5})/../[0-9a-f]{12}$!i);
-  print STDERR "discovered: $ip:$port (@$msg)\n" if DEBUG;
+  my $msg = $self->read_one(\$b, 1); # don't uncork writes
+  ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
+  print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
   $self->{port} = $port;
   return $ip.':'.$port;
 }
 
+
 sub write {
-  my $self = shift;
-  push @{$self->{_q}}, \@_;
+  my ($self, $cmd, $cb) = @_;
+  print STDERR "queuing: $cmd\n" if DEBUG;
+  my $str = $self->pack($cmd);
+  push @{$self->{_q}}, [$str, $cmd, $cb];
   $self->_write_now unless ($self->{_waiting});
   1;
 }
@@ -192,20 +204,21 @@ sub _write_now {
   my $self = shift;
   my $rec = shift @{$self->{_q}};
   my $wait_rec = delete $self->{_waiting};
-  if ($wait_rec) {
-    $wait_rec->[1]->() if ($wait_rec->[1]);
+  if ($wait_rec && $wait_rec->[1]) {
+    my ($str, $cmd, $cb) = @{$wait_rec->[1]};
+    $cb->() if ($cb);
   }
   return unless (defined $rec);
-  $self->_real_write($rec);
-  $self->{waiting} = [ $self->_time_now, $rec ];
+  $self->_real_write(@$rec);
+  $self->{_waiting} = [ $self->_time_now, $rec ];
 }
 
 sub _real_write {
-  my ($self, $rec) = @_;
-  my $str = $self->pack(@$rec);
-  print STDERR "sending: ", (unpack "H*", $str), "\n" if DEBUG;
+  my ($self, $str, $desc, $cb) = @_;
+  print STDERR "sending: $desc\n  ", _hexdump($str), "\n" if DEBUG;
   syswrite $self->filehandle, $str, length $str;
 }
+
 
 sub pack {
   my $self = shift;
@@ -213,8 +226,6 @@ sub pack {
   if ($self->{type} eq 'eISCP') {
     # 4953 4350 0000 0010 0000 000a 0100 0000 ISCP............
     # 2131 4d56 4c32 381a 0d0a                !1MVL28...
-    # 4953 4350 0000 0010 0000 000a 0100 0000 ISCP............
-    # 2131 4d56 4c32 381a 0d0a
     $d .= "\r";
     pack("a* N N N a*",
          'ISCP', 0x10, (length $d), 0x01000000, $d);
@@ -223,31 +234,144 @@ sub pack {
   }
 }
 
-sub volume {
-  my ($self, $percent, $cb) = @_;
-  if ($percent =~ /^(?:up|\+)$/i) {
-    $self->write('MVLUP' => $cb);
-  } elsif ($percent =~ /^(?:down|-)$/i) {
-    $self->write('MVLDOWN' => $cb);
-  } elsif ($percent =~ /^(100|[0-9][0-9]?)%?$/) {
-    my $cmd = sprintf 'MVL%02x', $1;
-    $self->write($cmd => $cb);
-  } elsif ($percent =~ /^(?:QSTN|\?)$/i) {
-    $self->write('MVLQSTN' => $cb);
-  } else {
-    croak "volume: argument should be up/down/percentage/? not '$percent'";
-  }
+sub _canon_command {
+  my $str = shift;
+  $str = lc $str;
+  $str =~ s/(?:question|query|qstn)/?/g;
+  $str =~ s/^master\ //g;
+  $str =~ s/volume/vol/g;
+  $str =~ s/centre/center/g;
+  $str =~ s/up/+/g;
+  $str =~ s/down/-/g;
+  $str =~ s/\s+//g;
+  $str;
 }
 
-sub power {
+our %command_map =
+  (
+   'power on' => 'PWR01',
+   'power off' => 'PWR00',
+   'power standby' => 'PWR00',
+   'power?' => 'PWRQSTN',
+   'mute' => 'AMT00',
+   'unmute' => 'AMT01',
+   'toggle mute' => 'AMTTG',
+   'mute?' => 'AMTQSTN',
+   'speaker a on' => 'SPA01',
+   'speaker a off' => 'SPA00',
+   'toggle speaker a' => 'SPAUP',
+   'speaker a?' => 'SPAQSTN',
+   'speaker b on' => 'SPB01',
+   'speaker b off' => 'SPB00',
+   'toggle speaker b' => 'SPBUP',
+   'speaker b?' => 'SPBQSTN',
+   'volume+' => 'MVLUP',
+   'volume-' => 'MVLDOWN',
+   'volume?' => 'MVLQSTN',
+
+   'front bass+' => 'TFRBUP',
+   'front bass-' => 'TFRBDOWN',
+   'front treble+' => 'TFRTUP',
+   'front treble-' => 'TFRTDOWN',
+   'front tone?' => 'TFRQSTN',
+
+   'front wide bass+' => 'TFWBUP',
+   'front wide bass-' => 'TFWBDOWN',
+   'front wide treble+' => 'TFWTUP',
+   'front wide treble-' => 'TFWTDOWN',
+   'front wide tone?' => 'TFWQSTN',
+
+   'front high bass+' => 'TFHBUP',
+   'front high bass-' => 'TFHBDOWN',
+   'front high treble+' => 'TFHTUP',
+   'front high treble-' => 'TFHTDOWN',
+   'front high tone?' => 'TFHQSTN',
+
+   'center bass+' => 'TCTBUP',
+   'center bass-' => 'TCTBDOWN',
+   'center treble+' => 'TCTTUP',
+   'center treble-' => 'TCTTDOWN',
+   'center tone?' => 'TCTQSTN',
+
+   'surround bass+' => 'TSRBUP',
+   'surround bass-' => 'TSRBDOWN',
+   'surround treble+' => 'TSRTUP',
+   'surround treble-' => 'TSRTDOWN',
+   'surround tone?' => 'TSRQSTN',
+
+   'surround back bass+' => 'TSBBUP',
+   'surround back bass-' => 'TSBBDOWN',
+   'surround back treble+' => 'TSBTUP',
+   'surround back treble-' => 'TSBTDOWN',
+   'surround back tone?' => 'TSBQSTN',
+
+   'subwoofer bass+' => 'TSWBUP',
+   'subwoofer bass-' => 'TSWBDOWN',
+   'subwoofer treble+' => 'TSWTUP',
+   'subwoofer treble-' => 'TSWTDOWN',
+   'subwoofer tone?' => 'TSWQSTN',
+
+   'sleep off' => 'SLPOFF',
+   'sleep?' => 'SLPQSTN',
+
+   'display0' => 'DIF00',
+   'display1' => 'DIF01',
+   'display2' => 'DIF02',
+   'display3' => 'DIF03',
+   'display toggle' => 'DIFTG',
+   'display?' => 'DIFQSTN',
+
+   'dimmer bright' => 'DIM00',
+   'dimmer dim' => 'DIM01',
+   'dimmer dark' => 'DIM02',
+   'dimmer off' => 'DIM03',
+   'dimmer ledoff' => 'DIM08',
+   'dimmer toggle' => 'DIMTG',
+   'dimmer?' => 'DIMQSTN',
+
+   'menu key' => 'OSDMENU',
+   'up key' => 'OSDUP',
+   'down key' => 'OSDDOWN',
+   'right key' => 'OSDRIGHT',
+   'left key' => 'OSDLEFT',
+   'enter key' => 'OSDENTER',
+   'exit key' => 'OSDEXIT',
+   'audio key' => 'OSDAUDIO',
+   'video key' => 'OSDVIDEO',
+   'home key' => 'OSDHOME',
+
+#   'memory store' => 'MEMSTR',
+#   'memory recall' => 'MEMRCL',
+#   'memory lock' => 'MEMLOCK',
+#   'memory unlock' => 'MEMUNLK',
+
+  );
+foreach my $k (keys %command_map) {
+  $command_map{_canon_command($k)} = delete $command_map{$k};
+}
+
+
+sub command {
   my ($self, $cmd, $cb) = @_;
-  my $str = { on => '01', off => '00',
-              '?' => 'QSTN', qstn => 'QSTN' }->{lc $cmd};
+  my $canon = _canon_command($cmd);
+  my $str = $command_map{$canon};
   if (defined $str) {
-    $self->write('PWR'.$str => $cb);
-  } else {
-    croak "power: argument should be on/off/? not '$cmd'";
+    $cmd = $str;
+  } elsif ($canon =~ /^vol(100|[0-9][0-9]?)%?$/) {
+    $cmd = sprintf 'MVL%02x', $1;
+  } elsif ($canon =~ /^sleep(90|[0-8][0-9]|[1-9])m\w+?$/) {
+    $cmd = sprintf 'SLP%02x', $1;
+  } elsif ($cmd !~ /^[A-Z][A-Z][A-Z]/) {
+    croak ref($self)."->command: '$cmd' does not match /^[A-Z][A-Z][A-Z]/";
   }
+  $self->write($cmd, $cb);
+}
+
+sub _hexdump {
+  my $s = shift;
+  my $r = unpack 'H*', $s;
+  $s =~ s/[^ -~]/./g;
+  $r.' '.$s;
 }
 
 1;
@@ -257,15 +381,18 @@ __END__
 
 =head1 NAME
 
-Device::Onkyo - To control Onkyo/Intregra AV equipment
+Device::Onkyo - Perl module to control Onkyo/Intregra AV equipment
 
 =head1 VERSION
 
-version 1.120740
+version 1.120780
 
 =head1 SYNOPSIS
 
-  my $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
+  my $onkyo = Device::Onkyo->new(device => 'discover');
+  $onkyo->power('on'); # switch on
+
+  $onkyo = Device::Onkyo->new(device => '/dev/ttyS0');
   $onkyo->write('PWR01'); # switch on
   while (1) {
     my $message = $onkyo->read();
@@ -275,15 +402,108 @@ version 1.120740
   $onkyo = Device::Onkyo->new(device => 'hostname:port');
   $onkyo->write('PWR01'); # switch on
 
-  $onkyo = Device::Onkyo->new(device => 'discover');
-  $onkyo->write('PWR01'); # switch on
-
 =head1 DESCRIPTION
 
 Module for controlling Onkyo/Intregra AV equipment.
 
 B<IMPORTANT:> This is an early release and the API is still subject to
 change. The serial port usage is entirely untested.
+
+=head1 METHODS
+
+=head2 C<new(%parameters)>
+
+This constructor returns a new Device::Onkyo object.  The supported
+parameters are:
+
+=over
+
+=item device
+
+The name of the device to connect to.  The value can be a tty device
+name or C<hostname:port> for TCP.  It may also be the string
+'discover' in which case automatic discovery will be attempted.  This
+value defaults to 'discover'.
+
+=item filehandle
+
+The name of an existing filehandle to be used instead of the 'device'
+parameter.
+
+=item type
+
+Whether the protocol should be 'ISCP' or 'eISCP'.  The default is
+'ISCP' if a tty device was given as the 'device' parameter or 'eISCP'
+otherwise.
+
+=item baud
+
+The baud rate for the tty device.  The default is C<9600>.
+
+=item baud
+
+The port for a TCP device.  The default is C<60128>.
+
+=back
+
+=head2 C<device()>
+
+Returns the device used to connect to the equipment.  If a filehandle
+was provided this method will return undef.
+
+=head2 C<type()>
+
+Returns the type of the device - either 'ISCP' or 'eISCP'.
+
+=head2 C<baud()>
+
+Returns the baud rate only makes sense for 'ISCP'-type devices.
+
+=head2 C<port()>
+
+Returns the TCP port for the device only makes sense for 'eISCP'-type
+devices.
+
+=head2 C<filehandle()>
+
+This method returns the file handle for the device.
+
+=head2 C<read([$timeout])>
+
+This method blocks until a new message has been received by the
+device.  When a message is received the message string is returned.
+An optional timeout (in seconds) may be provided.
+
+=head2 C<read_one(\$buffer, [$do_not_write])>
+
+This method attempts to remove a single message from the buffer
+passed in via the scalar reference.  When a message is removed a data
+structure is returned that represents the data received.  If insufficient
+data is available then undef is returned.
+
+By default, a received message triggers sending of the next queued message
+if the C<$do_no_write> parameter is set then writes are not triggered.
+
+=head2 C<discover()>
+
+This method attempts to discover available equipment.  Currently it
+returns a string of the form C<ip:port> with the first piece of
+equipment to respond.  This API may be modified/improved in future.
+
+=head2 C<write($command, $callback)>
+
+This method queues a command for sending to the connected device.
+The first write will be written immediately, subsequent writes are
+queued until a response to the previous message is received.
+
+=head2 C<pack($command)>
+
+This method takes a command and formats it for sending to the device.
+The format depends on the device type.
+
+=head2 C<command($command, [$callback])>
+
+This method takes a command and queues it for sending to the device.
 
 =head1 AUTHOR
 

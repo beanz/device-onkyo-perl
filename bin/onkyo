@@ -2,31 +2,44 @@
 use strict;
 use warnings;
 use Device::Onkyo;
+use Getopt::Long;
+use Pod::Usage;
+
 
 # ABSTRACT: Perl script to control an Onkyo/Integra AV Receiver
 # PODNAME: onkyo
 
 
-my $command = shift || 'PWR01';
-my $arg = shift;
-my $onkyo = Device::Onkyo->new(device => 'discover');
-if ($onkyo->can($command)) {
-  $onkyo->$command($arg);
-} else {
-  $onkyo->write($command);
+$|=1; # don't buffer output
+
+my $man;
+my $help;
+my $device = 'discover';
+GetOptions('device=s' => \$device,
+           'help|?' => \$help, man => \$man) or pod2usage(2);
+pod2usage(1) if $help;
+pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+
+my $onkyo = Device::Onkyo->new(device => $device);
+if (@ARGV) {
+  $onkyo->command(join ' ', @ARGV);
+  resp($onkyo);
+  exit;
 }
 
-my ($cmd, $args) = @{$onkyo->read};
-if ($cmd eq 'NLS') {
-  ($cmd, $args) = @{$onkyo->read};
+while (<>) {
+  chomp;
+  $onkyo->command($_);
+  resp($onkyo);
 }
-print "$cmd $args\n";
 
 sub resp {
   my $onkyo = shift;
-  my $msg = $onkyo->read;
-  my ($cmd, $args) = @$msg;
-  print $cmd, ' ', $args, "\n";
+  my $cmd = $onkyo->read;
+  if ($cmd =~ /^NLS/) {
+    $cmd = $onkyo->read;
+  }
+  print "$cmd\n";
 }
 
 __END__
@@ -38,18 +51,18 @@ onkyo - Perl script to control an Onkyo/Integra AV Receiver
 
 =head1 VERSION
 
-version 1.120740
+version 1.120780
 
 =head1 SYNOPSIS
 
-  # send power on
-  onkyo
-
-  # increase volume
+  # increase volume (using discovery)
   onkyo volume up
 
-  # decrease volume with "raw" command
+  # decrease volume with "raw" command (using discovery)
   onkyo MVLDOWN
+
+  # send multiple commands (using named device)
+  (echo power on ; echo volume- ) | onkyo --device amp.example.com
 
 =head1 DESCRIPTION
 
