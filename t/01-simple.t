@@ -6,7 +6,7 @@ use strict;
 use constant {
   DEBUG => $ENV{DEVICE_ONKYO_TEST_DEBUG}
 };
-use Test::More tests => 7;
+use Test::More tests => 6;
 
 use_ok 'Device::Onkyo';
 
@@ -31,7 +31,3 @@ $onkyo->{_buf} =
 
 $msg = $onkyo->read;
 is $msg, 'PWR01', '... read eISCP';
-
-eval { Device::Onkyo->new() };
-like $@, qr/^Device::Onkyo->new: 'device' parameter is required /,
-  'device is required';
