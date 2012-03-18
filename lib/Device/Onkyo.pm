@@ -38,6 +38,41 @@ Module for controlling Onkyo/Intregra AV equipment.
 B<IMPORTANT:> This is an early release and the API is still subject to
 change. The serial port usage is entirely untested.
 
+=method C<new(%parameters)>
+
+This constructor returns a new Device::Onkyo object.  The supported
+parameters are:
+
+=over
+
+=item device
+
+The name of the device to connect to.  The value can be a tty device
+name or C<hostname:port> for TCP.  It may also be the string
+'discover' in which case automatic discovery will be attempted.  This
+value defaults to 'discover'.
+
+=item filehandle
+
+The name of an existing filehandle to be used instead of the 'device'
+parameter.
+
+=item type
+
+Whether the protocol should be 'ISCP' or 'eISCP'.  The default is
+'ISCP' if a tty device was given as the 'device' parameter or 'eISCP'
+otherwise.
+
+=item baud
+
+The baud rate for the tty device.  The default is C<9600>.
+
+=item baud
+
+The port for a TCP device.  The default is C<60128>.
+
+=back
+
 =cut
 
 sub new {
@@ -48,19 +83,56 @@ sub new {
                     type => 'eISCP',
                     port => 60128,
                     baud => 9600,
+                    device => 'discover',
                     %p
                    }, $pkg;
-  unless (exists $p{filehandle}) {
-    croak $pkg.q{->new: 'device' parameter is required}
-      unless (exists $p{device});
+  if (exists $p{filehandle}) {
+    delete $self->{device};
+  } else {
     $self->_open();
   }
   $self;
 }
 
+=method C<device()>
+
+Returns the device used to connect to the equipment.  If a filehandle
+was provided this method will return undef.
+
+=cut
+
+sub device { shift->{device} }
+
+=method C<type()>
+
+Returns the type of the device - either 'ISCP' or 'eISCP'.
+
+=cut
+
+sub type { shift->{type} }
+
+=method C<baud()>
+
+Returns the baud rate only makes sense for 'ISCP'-type devices.
+
+=cut
+
 sub baud { shift->{baud} }
 
+=method C<port()>
+
+Returns the TCP port for the device only makes sense for 'eISCP'-type
+devices.
+
+=cut
+
 sub port { shift->{port} }
+
+=method C<filehandle()>
+
+This method returns the file handle for the device.
+
+=cut
 
 sub filehandle { shift->{filehandle} }
 
@@ -108,6 +180,14 @@ sub _open_serial_port {
   return $self->{filehandle} = $fh;
 }
 
+=method C<read([$timeout])>
+
+This method blocks until a new message has been received by the
+device.  When a message is received the message string is returned.
+An optional timeout (in seconds) may be provided.
+
+=cut
+
 sub read {
   my ($self, $timeout) = @_;
   my $res = $self->read_one(\$self->{_buf});
@@ -126,6 +206,18 @@ sub read {
     return $res if (defined $res);
   } while (1);
 }
+
+=method C<read_one(\$buffer, [$do_not_write])>
+
+This method attempts to remove a single message from the buffer
+passed in via the scalar reference.  When a message is removed a data
+structure is returned that represents the data received.  If insufficient
+data is available then undef is returned.
+
+By default, a received message triggers sending of the next queued message
+if the C<$do_no_write> parameter is set then writes are not triggered.
+
+=cut
 
 sub read_one {
   my ($self, $rbuf, $no_write) = @_;
@@ -167,6 +259,14 @@ sub _time_now {
   Time::HiRes::time
 }
 
+=method C<discover()>
+
+This method attempts to discover available equipment.  Currently it
+returns a string of the form C<ip:port> with the first piece of
+equipment to respond.  This API may be modified/improved in future.
+
+=cut
+
 # 4953 4350 0000 0010 0000 000b 0100 0000  ISCP............
 # 2178 4543 4e51 5354 4e0d 0a              !xECNQSTN\r\n
 
@@ -197,6 +297,14 @@ sub discover {
   return $ip.':'.$port;
 }
 
+=method C<write($command, $callback)>
+
+This method queues a command for sending to the connected device.
+The first write will be written immediately, subsequent writes are
+queued until a response to the previous message is received.
+
+=cut
+
 sub write {
   my ($self, $cmd, $cb) = @_;
   print STDERR "queuing: $cmd\n" if DEBUG;
@@ -224,6 +332,13 @@ sub _real_write {
   print STDERR "sending: $desc\n  ", _hexdump($str), "\n" if DEBUG;
   syswrite $self->filehandle, $str, length $str;
 }
+
+=method C<pack($command)>
+
+This method takes a command and formats it for sending to the device.
+The format depends on the device type.
+
+=cut
 
 sub pack {
   my $self = shift;
@@ -354,6 +469,12 @@ our %command_map =
 foreach my $k (keys %command_map) {
   $command_map{_canon_command($k)} = delete $command_map{$k};
 }
+
+=method C<command($command, [$callback])>
+
+This method takes a command and queues it for sending to the device.
+
+=cut
 
 sub command {
   my ($self, $cmd, $cb) = @_;
