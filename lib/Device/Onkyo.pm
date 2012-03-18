@@ -48,7 +48,6 @@ sub new {
                     type => 'eISCP',
                     port => 60128,
                     baud => 9600,
-                    discard_timeout => 1,
                     %p
                    }, $pkg;
   unless (exists $p{filehandle}) {
@@ -113,7 +112,6 @@ sub read {
   my ($self, $timeout) = @_;
   my $res = $self->read_one(\$self->{_buf});
   return $res if (defined $res);
-  $self->_discard_buffer_check(\$self->{_buf}) if ($self->{_buf} ne '');
   my $fh = $self->filehandle;
   my $sel = IO::Select->new($fh);
   do {
@@ -241,9 +239,9 @@ sub pack {
   }
 }
 
-sub canon_command {
+sub _canon_command {
   my $str = shift;
-  $str =~ tr/A-Z/a-z/;
+  $str = lc $str;
   $str =~ s/(?:question|query|qstn)/?/g;
   $str =~ s/^master\ //g;
   $str =~ s/volume/vol/g;
@@ -354,12 +352,12 @@ our %command_map =
 
   );
 foreach my $k (keys %command_map) {
-  $command_map{canon_command($k)} = delete $command_map{$k};
+  $command_map{_canon_command($k)} = delete $command_map{$k};
 }
 
 sub command {
   my ($self, $cmd, $cb) = @_;
-  my $canon = canon_command($cmd);
+  my $canon = _canon_command($cmd);
   my $str = $command_map{$canon};
   if (defined $str) {
     $cmd = $str;
