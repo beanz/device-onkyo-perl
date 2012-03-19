@@ -14,7 +14,7 @@ use constant {
   DEBUG => $ENV{DEVICE_ONKYO_DEBUG},
 };
 
-# ABSTRACT: Perl module to control Onkyo/Intregra AV equipment
+# ABSTRACT: Perl module to control Onkyo/Integra AV equipment
 
 =head1 SYNOPSIS
 
@@ -142,7 +142,10 @@ sub _open {
     $self->_open_serial_port(@_);
   } else {
     if ($self->{device} eq 'discover') {
-      $self->{device} = $self->discover;
+      my $devices = $self->discover;
+      my ($ip, $port) = @{$devices->[0]};
+      $self->{port} = $port;
+      $self->{device} = $ip.':'.$port
     }
     $self->_open_tcp_port(@_);
   }
@@ -261,9 +264,10 @@ sub _time_now {
 
 =method C<discover()>
 
-This method attempts to discover available equipment.  Currently it
-returns a string of the form C<ip:port> with the first piece of
-equipment to respond.  This API may be modified/improved in future.
+This method attempts to discover available equipment.  It returns
+a list reference of list references of ip and port pairs.
+
+Currently only the first responding device is returned.
 
 =cut
 
@@ -293,8 +297,7 @@ sub discover {
   my $msg = $self->read_one(\$b, 1); # don't uncork writes
   ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
-  $self->{port} = $port;
-  return $ip.':'.$port;
+  return [[$ip, $port]];
 }
 
 =method C<write($command, $callback)>
