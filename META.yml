@@ -1,5 +1,5 @@
 ---
-abstract: 'Perl module to control Onkyo/Intregra AV equipment'
+abstract: 'Perl module to control Onkyo/Integra AV equipment'
 author:
   - 'Mark Hindess <soft-cpan@temporalanomaly.com>'
 build_requires:

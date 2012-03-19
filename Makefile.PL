@@ -9,7 +9,7 @@ use ExtUtils::MakeMaker 6.31;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Perl module to control Onkyo/Intregra AV equipment',
+  'ABSTRACT' => 'Perl module to control Onkyo/Integra AV equipment',
   'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
   'BUILD_REQUIRES' => {
     'English' => '0',

@@ -17,7 +17,7 @@ use constant {
   DEBUG => $ENV{DEVICE_ONKYO_DEBUG},
 };
 
-# ABSTRACT: Perl module to control Onkyo/Intregra AV equipment
+# ABSTRACT: Perl module to control Onkyo/Integra AV equipment
 
 
 sub new {
@@ -383,7 +383,7 @@ __END__
 
 =head1 NAME
 
-Device::Onkyo - Perl module to control Onkyo/Intregra AV equipment
+Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
