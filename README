@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Intregra AV equipment
 
 VERSION
-    version 1.120780
+    version 1.120790
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
@@ -83,9 +83,10 @@ METHODS
     triggered.
 
   "discover()"
-    This method attempts to discover available equipment. Currently it
-    returns a string of the form "ip:port" with the first piece of equipment
-    to respond. This API may be modified/improved in future.
+    This method attempts to discover available equipment. It returns a list
+    reference of list references of ip and port pairs.
+
+    Currently only the first responding device is returned.
 
   "write($command, $callback)"
     This method queues a command for sending to the connected device. The
