@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 VERSION
-    version 1.120790
+    version 1.120800
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
@@ -47,8 +47,14 @@ METHODS
     baud
         The baud rate for the tty device. The default is 9600.
 
-    baud
+    port
         The port for a TCP device. The default is 60128.
+
+    broadcast_source_ip
+        The source ip address that the discovery process uses for its
+        broadcast. The default, '0.0.0.0', should work in most cases but
+        multi-homed hosts might need to specify the correct local interface
+        address.
 
   "device()"
     Returns the device used to connect to the equipment. If a filehandle was

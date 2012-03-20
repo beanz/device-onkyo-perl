@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Device::Onkyo;
 BEGIN {
-  $Device::Onkyo::VERSION = '1.120790';
+  $Device::Onkyo::VERSION = '1.120800';
 }
 
 use Carp qw/croak carp/;
@@ -29,6 +29,7 @@ sub new {
                     port => 60128,
                     baud => 9600,
                     device => 'discover',
+                    broadcast_source_ip => '0.0.0.0',
                     %p
                    }, $pkg;
   if (exists $p{filehandle}) {
@@ -172,7 +173,7 @@ sub discover {
   socket $s, PF_INET, SOCK_DGRAM, getprotobyname('udp');
   setsockopt $s, SOL_SOCKET, SO_BROADCAST, 1;
   binmode $s;
-  bind $s, sockaddr_in(0, inet_aton('0.0.0.0'));
+  bind $s, sockaddr_in(0, inet_aton($self->{broadcast_source_ip}));
   send($s,
        pack("a* N N N a*",
             'ISCP', 0x10, 0xb, 0x01000000, "!xECNQSTN\r\n"),
@@ -387,7 +388,7 @@ Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
-version 1.120790
+version 1.120800
 
 =head1 SYNOPSIS
 
@@ -442,9 +443,16 @@ otherwise.
 
 The baud rate for the tty device.  The default is C<9600>.
 
-=item baud
+=item port
 
 The port for a TCP device.  The default is C<60128>.
+
+=item broadcast_source_ip
+
+The source ip address that the discovery process uses for its
+broadcast.  The default, '0.0.0.0', should work in most cases but
+multi-homed hosts might need to specify the correct local interface
+address.
 
 =back
 
