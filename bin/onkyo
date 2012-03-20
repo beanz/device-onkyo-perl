@@ -20,6 +20,15 @@ use Pod::Usage;
   # send multiple commands (using named device)
   (echo power on ; echo volume- ) | onkyo --device amp.example.com
 
+  # request source input id from device specified with environment variable
+  DEVICE_ONKYO=amp.example.com onkyo SLIQSTN
+
+  # set source input id with discovery broadcast address set in env variable
+  onkyo --broadcast_source_ip 192.168.1.1 SLI00
+
+  # set source input id with discovery broadcast address set in env variable
+  DEVICE_ONKYO_BROADCAST_SOURCE_IP=192.168.1.1 onkyo SLI00
+
 =head1 DESCRIPTION
 
 This script is an example script to control an Onkyo receiver using the
@@ -31,13 +40,16 @@ $|=1; # don't buffer output
 
 my $man;
 my $help;
-my $device = 'discover';
+my $device = $ENV{DEVICE_ONKYO} || 'discover';
+my $broadcast_source_ip = $ENV{DEVICE_ONKYO_BROADCAST_SOURCE_IP} || '0.0.0.0';
 GetOptions('device=s' => \$device,
+           'broadcast_source_ip' => \$broadcast_source_ip,
            'help|?' => \$help, man => \$man) or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
-my $onkyo = Device::Onkyo->new(device => $device);
+my $onkyo = Device::Onkyo->new(device => $device,
+                               broadcast_source_ip => $broadcast_source_ip);
 if (@ARGV) {
   $onkyo->command(join ' ', @ARGV);
   resp($onkyo);
