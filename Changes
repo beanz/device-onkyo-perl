@@ -1,6 +1,7 @@
 Revision history for Perl extension Device::Onkyo.
 
 {{$NEXT}}
+    - Fix example script.
 
 1.120810  2012-03-21 21:19:52 Europe/London
     - Make discovery more flexible and fix test portability on FreeBSD.
