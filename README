@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 VERSION
-    version 1.120810
+    version 1.120811
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
