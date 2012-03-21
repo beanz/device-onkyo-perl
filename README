@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 VERSION
-    version 1.120800
+    version 1.120810
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
@@ -51,10 +51,14 @@ METHODS
         The port for a TCP device. The default is 60128.
 
     broadcast_source_ip
-        The source ip address that the discovery process uses for its
+        The source IP address that the discovery process uses for its
         broadcast. The default, '0.0.0.0', should work in most cases but
         multi-homed hosts might need to specify the correct local interface
         address.
+
+    broadcast_dest_ip
+        The IP address that the discovery process uses for its broadcast.
+        The default, '255.255.255.255', should work in most cases.
 
   "device()"
     Returns the device used to connect to the equipment. If a filehandle was

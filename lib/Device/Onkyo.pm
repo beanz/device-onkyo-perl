@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Device::Onkyo;
 BEGIN {
-  $Device::Onkyo::VERSION = '1.120800';
+  $Device::Onkyo::VERSION = '1.120810';
 }
 
 use Carp qw/croak carp/;
@@ -30,6 +30,7 @@ sub new {
                     baud => 9600,
                     device => 'discover',
                     broadcast_source_ip => '0.0.0.0',
+                    broadcast_dest_ip => '255.255.255.255',
                     %p
                    }, $pkg;
   if (exists $p{filehandle}) {
@@ -178,7 +179,7 @@ sub discover {
        pack("a* N N N a*",
             'ISCP', 0x10, 0xb, 0x01000000, "!xECNQSTN\r\n"),
        0,
-       sockaddr_in($self->port, inet_aton('255.255.255.255')));
+       sockaddr_in($self->port, inet_aton($self->{broadcast_dest_ip})));
   my $sel = IO::Select->new($s);
   $sel->can_read(10) or die;
   my $sender = recv $s, my $buf, 2048, 0;
@@ -388,7 +389,7 @@ Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
-version 1.120800
+version 1.120810
 
 =head1 SYNOPSIS
 
@@ -449,10 +450,15 @@ The port for a TCP device.  The default is C<60128>.
 
 =item broadcast_source_ip
 
-The source ip address that the discovery process uses for its
+The source IP address that the discovery process uses for its
 broadcast.  The default, '0.0.0.0', should work in most cases but
 multi-homed hosts might need to specify the correct local interface
 address.
+
+=item broadcast_dest_ip
+
+The IP address that the discovery process uses for its broadcast.  The
+default, '255.255.255.255', should work in most cases.
 
 =back
 
