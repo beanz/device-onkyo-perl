@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Device::Onkyo;
 BEGIN {
-  $Device::Onkyo::VERSION = '1.120810';
+  $Device::Onkyo::VERSION = '1.120811';
 }
 
 use Carp qw/croak carp/;
@@ -389,7 +389,7 @@ Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
-version 1.120810
+version 1.120811
 
 =head1 SYNOPSIS
 

@@ -1,8 +1,14 @@
+libdevice-onkyo-perl (1.120811-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Wed, 21 Mar 2012 21:50:00 +0000
+
 libdevice-onkyo-perl (1.120810-1) unstable; urgency=low
 
   * New upstream release.
 
- -- Mark Hindess <soft-debian@temporalanomaly.com>  Wed, 21 Mar 2012 21:15:28 +0000
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Wed, 21 Mar 2012 21:19:52 +0000
 
 libdevice-onkyo-perl (1.120800-1) unstable; urgency=low
 
