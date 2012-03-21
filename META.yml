@@ -31,4 +31,4 @@ requires:
 resources:
   bugtracker: https://github.com/beanz/device-onkyo-perl/issues
   repository: git://github.com/beanz/device-onkyo-perl.git
-version: 1.120800
+version: 1.120810
