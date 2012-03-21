@@ -45,7 +45,9 @@ if ($pid == 0) {
     ['ISCP', 0x10, 0x8, 0x01000000, "!1PWR01\r"], '... power on';
 } elsif ($pid) {
   # parent
-  my $onkyo = Device::Onkyo->new(device => 'discover', port => $port);
+  my $onkyo = Device::Onkyo->new(device => 'discover', port => $port,
+                                 broadcast_dest_ip => '127.0.0.1',
+                                 broadcast_source_ip => '127.0.0.1');
   ok $onkyo, 'object';
   is $onkyo->port, $tcp_port, '... discovered';
   $onkyo->command('power on');

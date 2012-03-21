@@ -42,6 +42,8 @@ my $man;
 my $help;
 my $device = $ENV{DEVICE_ONKYO} || 'discover';
 my $broadcast_source_ip = $ENV{DEVICE_ONKYO_BROADCAST_SOURCE_IP} || '0.0.0.0';
+my $broadcast_dest_ip =
+  $ENV{DEVICE_ONKYO_BROADCAST_DEST_IP} || '255.255.255.255';
 GetOptions('device=s' => \$device,
            'broadcast_source_ip' => \$broadcast_source_ip,
            'help|?' => \$help, man => \$man) or pod2usage(2);
@@ -49,6 +51,7 @@ pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
 my $onkyo = Device::Onkyo->new(device => $device,
+                               broadcast_dest_ip => $broadcast_dest_ip);
                                broadcast_source_ip => $broadcast_source_ip);
 if (@ARGV) {
   $onkyo->command(join ' ', @ARGV);
