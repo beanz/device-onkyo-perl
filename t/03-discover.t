@@ -13,11 +13,13 @@ use IO::Socket::INET;
 socket my $s, PF_INET, SOCK_DGRAM, getprotobyname('udp');
 setsockopt $s, SOL_SOCKET, SO_BROADCAST, 1;
 binmode $s;
-bind $s, sockaddr_in(0, inet_aton('0.0.0.0'));
+bind $s, sockaddr_in(0, inet_aton('127.0.0.1'))
+  or plan skip_all => "Failed to bind to loopback address: $!";
 my ($port, $addr) = sockaddr_in(getsockname($s));
 my $tcp =
   IO::Socket::INET->new(Listen => 5, Proto => 'tcp',
-                        LocalAddr => '0.0.0.0', LocalPort => 0) or die;
+                        LocalAddr => '127.0.0.1', LocalPort => 0)
+  or plan skip_all => "Failed to listen on loopback address: $!";
 my $tcp_port = $tcp->sockport;
 
 my $pid = fork();
