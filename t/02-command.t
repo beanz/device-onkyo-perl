@@ -3,9 +3,7 @@
 # Copyright (C) 2012 by Mark Hindess
 
 use strict;
-use constant {
-  DEBUG => $ENV{DEVICE_ONKYO_TEST_DEBUG}
-};
+use constant DEBUG => $ENV{DEVICE_ONKYO_TEST_DEBUG};
 use Test::More tests => 10;
 
 {

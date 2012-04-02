@@ -10,9 +10,7 @@ use Socket;
 use Symbol qw(gensym);
 use Time::HiRes;
 
-use constant {
-  DEBUG => $ENV{DEVICE_ONKYO_DEBUG},
-};
+use constant DEBUG => $ENV{DEVICE_ONKYO_DEBUG};
 
 # ABSTRACT: Perl module to control Onkyo/Integra AV equipment
 
