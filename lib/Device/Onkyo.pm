@@ -206,6 +206,7 @@ An optional timeout (in seconds) may be provided.
 sub read {
   my ($self, $timeout) = @_;
   my $res = $self->read_one(\$self->{_buf});
+  $self->_write_now() if (defined $res);
   return $res if (defined $res);
   my $fh = $self->filehandle;
   my $sel = IO::Select->new($fh);
@@ -222,20 +223,17 @@ sub read {
   } while (1);
 }
 
-=method C<read_one(\$buffer, [$do_not_write])>
+=method C<read_one(\$buffer)>
 
 This method attempts to remove a single message from the buffer
 passed in via the scalar reference.  When a message is removed a data
 structure is returned that represents the data received.  If insufficient
 data is available then undef is returned.
 
-By default, a received message triggers sending of the next queued message
-if the C<$do_no_write> parameter is set then writes are not triggered.
-
 =cut
 
 sub read_one {
-  my ($self, $rbuf, $no_write) = @_;
+  my ($self, $rbuf) = @_;
   return unless ($$rbuf);
 
   print STDERR "rbuf=", _hexdump($$rbuf), "\n" if DEBUG;
@@ -258,14 +256,12 @@ sub read_one {
     $body =~ s/[\032\r\n]+$//;
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now unless ($no_write);
     return $body;
   } else {
     return unless ($$rbuf =~ s/^(..)(....*?)[\032\r\n]+//);
     my ($sd, $body) = ($1, $2);
     carp "Unexpected start/destination: expected '!1', got '$sd'\n"
       unless ($sd eq '!1');
-    $self->_write_now unless ($no_write);
     return $body;
   }
 }
@@ -306,7 +302,7 @@ sub discover {
   my ($port, $addr) = sockaddr_in($sender);
   my $ip = inet_ntoa($addr);
   my $b = $buf;
-  my $msg = $self->read_one(\$b, 1); # don't uncork writes
+  my $msg = $self->read_one(\$b); # don't uncork writes
   ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
   return [[$ip, $port]];
