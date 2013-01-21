@@ -179,18 +179,20 @@ sub _open_tcp_port {
 sub _open_serial_port {
   my $self = shift;
   $self->{type} = 'ISCP';
+  my $dev = $self->{device};
+  print STDERR "Opening $dev as serial port\n" if DEBUG;
   my $fh = gensym();
-  my $s = tie (*$fh, 'Device::SerialPort', $self->{device}) ||
-    croak "Could not tie serial port to file handle: $!\n";
-  $s->baudrate($self->baud);
-  $s->databits(8);
-  $s->parity("none");
-  $s->stopbits(1);
-  $s->datatype("raw");
-  $s->write_settings();
+  my $sport = tie (*$fh, 'Device::SerialPort', $dev) or
+    croak "Could not tie serial port, $dev, to file handle: $!";
+  $sport->baudrate($self->baud);
+  $sport->databits(8);
+  $sport->parity("none");
+  $sport->stopbits(1);
+  $sport->datatype("raw");
+  $sport->write_settings();
 
-  sysopen($fh, $self->{device}, O_RDWR|O_NOCTTY|O_NDELAY) or
-    croak "open of '".$self->{device}."' failed: $!\n";
+  sysopen $fh, $dev, O_RDWR|O_NOCTTY|O_NDELAY or
+    croak "sysopen of '$dev' failed: $!";
   $fh->autoflush(1);
   return $self->{filehandle} = $fh;
 }
