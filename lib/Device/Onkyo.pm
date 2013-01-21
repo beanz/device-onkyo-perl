@@ -303,7 +303,7 @@ sub discover {
   my $ip = inet_ntoa($addr);
   my $b = $buf;
   my $msg = $self->read_one(\$b); # don't uncork writes
-  ($port) = ($msg =~ m!/(\d{5})/../[0-9a-f]{12}!i);
+  ($port) = ($msg =~ m!/(\d+)/../[0-9a-f]{12}$!i);
   print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
   return [[$ip, $port]];
 }
