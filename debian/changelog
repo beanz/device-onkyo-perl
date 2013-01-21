@@ -1,3 +1,10 @@
+libdevice-onkyo-perl (1.130210-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add Device::SerialPort dependency.
+
+ -- Mark Hindess <soft-debian@temporalanomaly.com>  Mon, 21 Jan 2013 21:39:06 +0000
+
 libdevice-onkyo-perl (1.120811-1) unstable; urgency=low
 
   * New upstream release.
