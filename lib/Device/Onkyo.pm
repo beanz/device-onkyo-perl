@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Device::Onkyo;
 {
-  $Device::Onkyo::VERSION = '1.130210';
+  $Device::Onkyo::VERSION = '1.130211';
 }
 
 use Carp qw/croak carp/;
@@ -188,7 +188,7 @@ sub discover {
   my $ip = inet_ntoa($addr);
   my $b = $buf;
   my $msg = $self->read_one(\$b); # don't uncork writes
-  ($port) = ($msg =~ m!/(\d+)/../[0-9a-f]{12}$!i);
+  ($port) = ($msg =~ m!/(\d+)/../[0-9a-f]{12}!i);
   print STDERR "discovered: $ip:$port ($msg)\n" if DEBUG;
   return [[$ip, $port]];
 }
@@ -388,7 +388,7 @@ Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
-version 1.130210
+version 1.130211
 
 =head1 SYNOPSIS
 
