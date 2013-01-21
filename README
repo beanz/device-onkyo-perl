@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 VERSION
-    version 1.120811
+    version 1.130210
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
@@ -82,15 +82,11 @@ METHODS
     When a message is received the message string is returned. An optional
     timeout (in seconds) may be provided.
 
-  "read_one(\$buffer, [$do_not_write])"
+  "read_one(\$buffer)"
     This method attempts to remove a single message from the buffer passed
     in via the scalar reference. When a message is removed a data structure
     is returned that represents the data received. If insufficient data is
     available then undef is returned.
-
-    By default, a received message triggers sending of the next queued
-    message if the $do_no_write parameter is set then writes are not
-    triggered.
 
   "discover()"
     This method attempts to discover available equipment. It returns a list

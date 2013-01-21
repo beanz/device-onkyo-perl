@@ -4,44 +4,46 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Perl module to control Onkyo/Integra AV equipment',
-  'AUTHOR' => 'Mark Hindess <soft-cpan@temporalanomaly.com>',
-  'BUILD_REQUIRES' => {
-    'English' => '0',
-    'Test::More' => '0',
-    'Test::Requires' => '0',
-    'Test::SharedFork' => '0'
+  "ABSTRACT" => "Perl module to control Onkyo/Integra AV equipment",
+  "AUTHOR" => "Mark Hindess <soft-cpan\@temporalanomaly.com>",
+  "BUILD_REQUIRES" => {
+    "Test::More" => 0,
+    "Test::Requires" => 0,
+    "Test::SharedFork" => 0,
+    "base" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'Device-Onkyo',
-  'EXE_FILES' => [
-    'bin/onkyo'
+  "DISTNAME" => "Device-Onkyo",
+  "EXE_FILES" => [
+    "bin/onkyo"
   ],
-  'LICENSE' => 'perl',
-  'NAME' => 'Device::Onkyo',
-  'PREREQ_PM' => {
-    'Carp' => '0',
-    'Device::SerialPort' => '0',
-    'Fcntl' => '0',
-    'Getopt::Long' => '0',
-    'IO::Select' => '0',
-    'IO::Socket::INET' => '0',
-    'Pod::Usage' => '0',
-    'Socket' => '0',
-    'Symbol' => '0',
-    'Time::HiRes' => '0',
-    'constant' => '0'
+  "LICENSE" => "perl",
+  "NAME" => "Device::Onkyo",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Device::SerialPort" => 0,
+    "Fcntl" => 0,
+    "Getopt::Long" => 0,
+    "IO::Select" => 0,
+    "IO::Socket::INET" => 0,
+    "Pod::Usage" => 0,
+    "Socket" => 0,
+    "Symbol" => 0,
+    "Time::HiRes" => 0,
+    "constant" => 0,
+    "strict" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '1.120811',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "1.130210",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
