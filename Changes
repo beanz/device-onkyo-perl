@@ -1,6 +1,6 @@
 Revision history for Perl extension Device::Onkyo.
 
-1.142000  2014-07-19 13:31:52+01:00 Europe/London
+1.142000  2014-07-19 13:32:13+01:00 Europe/London
 
 1.130211  2013-01-21 22:27:32 Europe/London
     - Fix another discovery bug.
