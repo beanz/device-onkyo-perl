@@ -2,7 +2,7 @@ NAME
     Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 VERSION
-    version 1.130211
+    version 1.142220
 
 SYNOPSIS
       my $onkyo = Device::Onkyo->new(device => 'discover');
@@ -110,7 +110,7 @@ AUTHOR
     Mark Hindess <soft-cpan@temporalanomaly.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2012 by Mark Hindess.
+    This software is copyright (c) 2014 by Mark Hindess.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
