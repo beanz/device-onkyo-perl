@@ -17,6 +17,8 @@ debian/rules
 debian/watch
 dist.ini
 lib/Device/Onkyo.pm
+t/00-report-prereqs.dd
+t/00-report-prereqs.t
 t/01-simple.t
 t/02-command.t
 t/03-discover.t
