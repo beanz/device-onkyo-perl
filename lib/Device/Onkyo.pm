@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Device::Onkyo;
-$Device::Onkyo::VERSION = '1.142000';
+$Device::Onkyo::VERSION = '1.142220';
 use Carp qw/croak carp/;
 use Device::SerialPort qw/:PARAM :STAT 0.07/;
 use Fcntl;
@@ -388,7 +388,7 @@ Device::Onkyo - Perl module to control Onkyo/Integra AV equipment
 
 =head1 VERSION
 
-version 1.142000
+version 1.142220
 
 =head1 SYNOPSIS
 
