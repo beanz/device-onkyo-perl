@@ -10,9 +10,9 @@ build_requires:
   Test::SharedFork: '0'
   base: '0'
 configure_requires:
-  ExtUtils::MakeMaker: '6.30'
+  ExtUtils::MakeMaker: '0'
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.141520'
+generated_by: 'Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.143240'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -35,4 +35,4 @@ requires:
 resources:
   bugtracker: https://github.com/beanz/device-onkyo-perl/issues
   repository: git://github.com/beanz/device-onkyo-perl.git
-version: '1.142220'
+version: '1.143250'
