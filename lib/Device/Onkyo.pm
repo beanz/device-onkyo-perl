@@ -3,7 +3,6 @@ use warnings;
 package Device::Onkyo;
 
 use Carp qw/croak carp/;
-use Device::SerialPort qw/:PARAM :STAT 0.07/;
 use Fcntl;
 use IO::Select;
 use Socket;
@@ -181,6 +180,9 @@ sub _open_serial_port {
   $self->{type} = 'ISCP';
   my $dev = $self->{device};
   print STDERR "Opening $dev as serial port\n" if DEBUG;
+  eval { require Device::SerialPort; };
+  die "Device::SerialPort is required for serial port devices\n$@\n" if ($@);
+  import Device::SerialPort qw/:PARAM :STAT 0.07/;
   my $fh = gensym();
   my $sport = tie (*$fh, 'Device::SerialPort', $dev) or
     croak "Could not tie serial port, $dev, to file handle: $!";
