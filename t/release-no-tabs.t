@@ -17,6 +17,8 @@ use Test::NoTabs;
 my @files = (
     'bin/onkyo',
     'lib/Device/Onkyo.pm',
+    't/00-report-prereqs.dd',
+    't/00-report-prereqs.t',
     't/01-simple.t',
     't/02-command.t',
     't/03-discover.t',
