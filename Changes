@@ -1,6 +1,7 @@
 Revision history for Perl extension Device::Onkyo.
 
 {{$NEXT}}
+    - Fix authordeps.
 
 1.143250  2014-11-21 23:00:56+00:00 Europe/London
     - Make Device::SerialPort module optional - fixes #2.
