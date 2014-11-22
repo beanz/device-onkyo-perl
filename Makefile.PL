@@ -44,7 +44,7 @@ my %WriteMakefileArgs = (
     "Test::SharedFork" => 0,
     "base" => 0
   },
-  "VERSION" => "1.143250",
+  "VERSION" => "1.143260",
   "test" => {
     "TESTS" => "t/*.t"
   }
