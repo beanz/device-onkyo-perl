@@ -32,7 +32,6 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
-            "Device::SerialPort" : "0",
             "Fcntl" : "0",
             "Getopt::Long" : "0",
             "IO::Select" : "0",
@@ -74,6 +73,6 @@
          "web" : "https://github.com/beanz/device-onkyo-perl"
       }
    },
-   "version" : "1.143260"
+   "version" : "1.143640"
 }
 
