@@ -1,5 +1,8 @@
 Revision history for Perl extension Device::Onkyo.
 
+1.143640  2014-12-30 08:43:15+00:00 Europe/London
+    - Fix META.yml to remove Device::SerialPort from required section.
+
 1.143260  2014-11-22 18:57:56+00:00 Europe/London
     - Fix authordeps.
 

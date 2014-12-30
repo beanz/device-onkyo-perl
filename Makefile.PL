@@ -23,7 +23,6 @@ my %WriteMakefileArgs = (
   "NAME" => "Device::Onkyo",
   "PREREQ_PM" => {
     "Carp" => 0,
-    "Device::SerialPort" => 0,
     "Fcntl" => 0,
     "Getopt::Long" => 0,
     "IO::Select" => 0,
@@ -44,7 +43,7 @@ my %WriteMakefileArgs = (
     "Test::SharedFork" => 0,
     "base" => 0
   },
-  "VERSION" => "1.143260",
+  "VERSION" => "1.143640",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -53,7 +52,6 @@ my %WriteMakefileArgs = (
 
 my %FallbackPrereqs = (
   "Carp" => 0,
-  "Device::SerialPort" => 0,
   "ExtUtils::MakeMaker" => 0,
   "Fcntl" => 0,
   "File::Spec" => 0,

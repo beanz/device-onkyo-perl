@@ -20,7 +20,6 @@ meta-spec:
 name: Device-Onkyo
 requires:
   Carp: '0'
-  Device::SerialPort: '0'
   Fcntl: '0'
   Getopt::Long: '0'
   IO::Select: '0'
@@ -35,4 +34,4 @@ requires:
 resources:
   bugtracker: https://github.com/beanz/device-onkyo-perl/issues
   repository: git://github.com/beanz/device-onkyo-perl.git
-version: '1.143260'
+version: '1.143640'
